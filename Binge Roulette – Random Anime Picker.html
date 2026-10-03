@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Binge Roulette – Random Anime Picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--panel:#120506;--line:#3a0b0e;--red:#ff2441;--deep:#8f0f1c;--text:#f4eaea;--mute:#a88b8d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 'M PLUS Rounded 1c',system-ui,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:28px 18px 60px}
+h1,h2,.title{font-family:'Dela Gothic One',Impact,sans-serif;font-weight:400;letter-spacing:.01em;margin:0}
+h1{font-size:clamp(44px,12vw,92px);line-height:.95}
+h1 span{color:var(--red)}
+.sub{color:var(--mute);margin:10px 0 22px;max-width:46ch}
+button{font:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+select,input{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font:inherit;min-width:0}
+.go{background:var(--red);border:0;border-radius:6px;padding:14px 26px;font-family:'Dela Gothic One',Impact,sans-serif;font-size:22px;letter-spacing:.03em;flex:1 1 100%}
+.go:hover{background:#ff1a25}
+.card{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--red);border-radius:8px;padding:22px;min-height:190px}
+.card .title{font-size:clamp(32px,8vw,56px);line-height:1.02}
+.card.roll .title{color:var(--mute)}
+.meta{color:var(--mute);margin:8px 0 6px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 16px}
+.tag{border:1px solid var(--line);border-radius:99px;padding:2px 10px;font-size:13px;color:var(--mute)}
+.st{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--red);background:transparent;border-radius:6px;padding:6px 12px;font-size:14px;font-weight:600}
+.chip[data-s=watching][aria-pressed=true]{background:var(--red);color:#fff}
+.chip[data-s=watched][aria-pressed=true]{background:var(--deep);border-color:var(--deep);color:#fff}
+.chip[data-s=watchlist][aria-pressed=true]{background:#fff;border-color:#fff;color:#000}
+.chip[data-s=dropped]{border-color:#555;color:#999}
+.chip[data-s=dropped][aria-pressed=true]{background:#222;border-color:#555;color:#bbb;text-decoration:line-through}
+h2{font-size:34px;margin:44px 0 12px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px}
+.tab{background:none;border:1px solid var(--line);border-radius:6px;padding:7px 14px;white-space:nowrap;color:var(--mute)}
+.tab[aria-selected=true]{border-color:var(--red);color:#fff;background:var(--panel)}
+.tab b{color:var(--red);margin-left:4px}
+.list{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.row .n{font-weight:700}
+.row .m{color:var(--mute);font-size:13px}
+.row .st{grid-column:1/-1}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;border:2px solid var(--red)}
+.dot.watching{background:var(--red)}.dot.watched{background:var(--deep);border-color:var(--deep)}
+.dot.watchlist{background:#fff;border-color:#fff}.dot.dropped{background:#333;border-color:#555}
+.desc{margin:10px 0 0;max-width:62ch}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);text-align:center;font-family:'Dela Gothic One',Impact,sans-serif;font-size:22px;letter-spacing:.04em;color:var(--red)}
+[hidden]{display:none!important}
+.libbtn{margin-top:20px;background:none;border:1px solid var(--red);border-radius:6px;padding:10px 18px;font-weight:600}
+.libbtn:hover{background:var(--panel)}
+.acct{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:22px;font-size:14px;color:var(--mute)}
+.acct a,.acct button,.pbt{color:var(--text);border:1px solid var(--red);border-radius:6px;padding:6px 12px;background:none;text-decoration:none;font-size:14px;font-weight:600;margin:0 8px 8px 0}
+.acct a,.acct button{margin:0}
+.acct a:hover,.acct button:hover,.pbt:hover{background:var(--panel)}
+.lt{margin-bottom:6px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;margin:0 0 14px}
+.panel textarea{width:100%;background:#000;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:10px;font:14px/1.4 'M PLUS Rounded 1c',system-ui,sans-serif;margin-bottom:10px;resize:vertical}
+.panel .m{color:var(--mute);margin:0 0 8px}
+.empty{color:var(--mute);padding:18px;border:1px dashed var(--line);border-radius:6px}
+@media(min-width:640px){.go{flex:0 0 auto}.row{grid-template-columns:1fr auto}.row .st{grid-column:auto}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* anime theme */
+body{background:radial-gradient(circle at 100% 0,rgba(255,36,65,.28),transparent 40%),radial-gradient(rgba(255,36,65,.16) 1.3px,transparent 1.7px) 0 0/16px 16px,#000;background-attachment:fixed}
+.hero{position:relative;padding:8px 44px 18px 0;margin-bottom:18px;border-bottom:3px solid #fff;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(from 0deg at 88% 35%,rgba(255,36,65,.35) 0 1deg,transparent 1deg 5deg);-webkit-mask-image:radial-gradient(circle at 88% 35%,transparent 10%,#000 70%);mask-image:radial-gradient(circle at 88% 35%,transparent 10%,#000 70%)}
+.hero>*{position:relative}
+.hero>.jp{position:absolute;right:4px;top:6px;writing-mode:vertical-rl;font-weight:800;font-size:17px;line-height:1;letter-spacing:.3em;color:#fff;background:var(--red);padding:10px 5px;border:2px solid #fff}
+h1{font-size:clamp(38px,11vw,84px);line-height:1.05;text-shadow:4px 4px 0 var(--deep);transform:skewX(-6deg);transform-origin:left}
+h1 span{-webkit-text-stroke:2px #fff;paint-order:stroke fill}
+.sub{font-weight:700;margin-bottom:0}
+.go{border:3px solid #fff;box-shadow:5px 5px 0 #fff;transform:skewX(-8deg);font-size:20px;transition:transform .08s,box-shadow .08s}
+.go:hover{transform:skewX(-8deg) translate(2px,2px);box-shadow:3px 3px 0 #fff}
+.go:active{transform:skewX(-8deg) translate(5px,5px);box-shadow:0 0 0 #fff}
+select,input{border:2px solid #fff;border-radius:4px;font-weight:700}
+.card{position:relative;background:#080808;border:3px solid #fff;border-radius:4px;box-shadow:7px 7px 0 var(--red)}
+.card .title{font-size:clamp(24px,6.5vw,40px);line-height:1.15;text-shadow:3px 3px 0 var(--deep);transform:skewX(-5deg);transform-origin:left}
+.card.roll{animation:shake .12s infinite}
+.card.pop{animation:pop .35s ease-out}
+@keyframes shake{0%{transform:translate(2px,-1px)}50%{transform:translate(-2px,1px)}100%{transform:translate(1px,2px)}}
+@keyframes pop{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+.sfx{position:absolute;top:-14px;right:10px;background:var(--red);color:#fff;border:3px solid #fff;padding:2px 12px;font-family:'Dela Gothic One',Impact,sans-serif;font-size:20px;transform:rotate(6deg)}
+.tag{background:var(--red);color:#fff;border:2px solid #fff;border-radius:2px;font-weight:800;transform:skewX(-8deg)}
+.chip{border-width:2px;border-radius:3px;font-weight:800;box-shadow:2px 2px 0 var(--red)}
+.chip:active{transform:translate(2px,2px);box-shadow:none}
+h2{display:inline-block;background:var(--red);border:3px solid #fff;padding:2px 16px;transform:skewX(-8deg);font-size:28px}
+.tab,.libbtn,.acct a,.acct button,.pbt{border-width:2px;border-radius:3px;font-weight:800}
+.tab[aria-selected=true]{background:var(--red);color:#fff;border-color:#fff}
+.tab[aria-selected=true] b{color:#fff}
+.row{border:2px solid var(--line);border-left:5px solid var(--red);border-radius:3px}
+.dot{border-radius:2px;transform:rotate(45deg)}
+footer{font-size:20px;color:#fff;text-shadow:2px 2px 0 var(--red);border-top:3px solid #fff}
+footer small{font-size:14px;color:var(--red);text-shadow:none}
+@media(prefers-reduced-motion:reduce){.card.roll,.card.pop{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="acct" class="acct"></div>
+  <div class="hero"><span class="jp" aria-hidden="true">次は何を見る？</span><h1>Binge<br><span>Roulette</span></h1>
+  <p class="sub">Can't decide what to watch? Let fate pick your next anime, then track it as you go.</p></div>
+
+  <div class="controls">
+    <select id="genre" aria-label="Genre"></select>
+    <select id="pool" aria-label="Pick from">
+      <option value="fresh">Not started yet</option>
+      <option value="watchlist">My watchlist only</option>
+      <option value="all">Everything</option>
+    </select>
+    <button class="go" id="go">Pick my anime</button>
+  </div>
+
+  <div class="card" id="card" aria-live="polite">
+    <div class="title" style="color:var(--mute)">Press the button.</div>
+    <p class="meta">Your pick appears here.</p>
+  </div>
+
+  <button class="libbtn" id="libbtn" aria-expanded="false" aria-controls="lib">Open my library</button>
+  <section id="lib" hidden>
+  <h2>My library</h2>
+  <div class="lt"><button class="pbt" id="shareBtn">Share my library</button><button class="pbt" id="impBtn">Import a library</button></div>
+  <div id="panel" class="panel" hidden></div>
+  <div class="controls"><input id="q" type="search" placeholder="Search titles or descriptions" aria-label="Search titles" style="flex:1"></div>
+  <div class="tabs" id="tabs" role="tablist"></div>
+  <div class="list" id="list"></div>
+  </section>
+</div>
+
+<script>
+const A=[
+["One Piece",1999,1100,["Adventure","Action","Fantasy"]],
+["Naruto Shippuden",2007,500,["Action","Adventure"]],
+["Bleach",2004,366,["Action","Supernatural"]],
+["Bleach: Thousand-Year Blood War",2022,40,["Action","Supernatural"]],
+["Attack on Titan",2013,87,["Action","Drama","Dark"]],
+["Death Note",2006,37,["Thriller","Mystery","Supernatural"]],
+["Fullmetal Alchemist: Brotherhood",2009,64,["Adventure","Fantasy","Action"]],
+["Hunter x Hunter",2011,148,["Adventure","Action","Fantasy"]],
+["Jujutsu Kaisen",2020,47,["Action","Supernatural","Dark"]],
+["Demon Slayer",2019,63,["Action","Supernatural"]],
+["Chainsaw Man",2022,12,["Action","Dark","Horror"]],
+["Cowboy Bebop",1998,26,["Sci-Fi","Action","Drama"]],
+["Steins;Gate",2011,24,["Sci-Fi","Thriller","Drama"]],
+["Code Geass",2006,50,["Sci-Fi","Action","Drama"]],
+["Vinland Saga",2019,48,["Action","Drama","Historical"]],
+["Mob Psycho 100",2016,37,["Comedy","Supernatural","Action"]],
+["One Punch Man",2015,24,["Comedy","Action"]],
+["My Hero Academia",2016,170,["Action","Superhero"]],
+["Dragon Ball Z",1989,291,["Action","Adventure"]],
+["Gintama",2006,367,["Comedy","Action","Parody"]],
+["Haikyuu!!",2014,85,["Sports","Drama","Comedy"]],
+["Kuroko's Basketball",2012,75,["Sports","Drama"]],
+["Your Lie in April",2014,22,["Romance","Drama","Music"]],
+["Violet Evergarden",2018,13,["Drama","Fantasy"]],
+["Frieren: Beyond Journey's End",2023,28,["Fantasy","Adventure","Drama"]],
+["Spy x Family",2022,37,["Comedy","Action"]],
+["Cyberpunk: Edgerunners",2022,10,["Sci-Fi","Action","Dark"]],
+["Neon Genesis Evangelion",1995,26,["Sci-Fi","Drama","Psychological"]],
+["Monster",2004,74,["Thriller","Mystery","Psychological"]],
+["Berserk (1997)",1997,25,["Dark","Fantasy","Action"]],
+["Hellsing Ultimate",2006,10,["Horror","Action","Dark"]],
+["Trigun",1998,26,["Sci-Fi","Action","Comedy"]],
+["Samurai Champloo",2004,26,["Action","Adventure","Historical"]],
+["Black Clover",2017,170,["Action","Fantasy"]],
+["Fire Force",2019,48,["Action","Supernatural"]],
+["Dr. Stone",2019,57,["Sci-Fi","Adventure","Comedy"]],
+["Solo Leveling",2024,25,["Action","Fantasy"]],
+["Dandadan",2024,12,["Comedy","Supernatural","Action"]],
+["Kaguya-sama: Love Is War",2019,37,["Romance","Comedy"]],
+["Toradora!",2008,25,["Romance","Comedy","Drama"]],
+["Clannad: After Story",2008,24,["Drama","Romance"]],
+["Re:Zero",2016,50,["Fantasy","Psychological","Drama"]],
+["Tokyo Ghoul",2014,24,["Horror","Dark","Action"]],
+["Parasyte: The Maxim",2014,24,["Horror","Sci-Fi","Action"]],
+["Erased",2016,12,["Mystery","Thriller","Supernatural"]],
+["Made in Abyss",2017,25,["Adventure","Fantasy","Dark"]],
+["Akame ga Kill!",2014,24,["Action","Dark","Fantasy"]],
+["Blue Lock",2022,38,["Sports","Drama"]],
+["Bocchi the Rock!",2022,12,["Comedy","Music"]],
+["Mushishi",2005,26,["Supernatural","Mystery","Drama"]],
+["Gurren Lagann",2007,27,["Mecha","Action","Adventure"]]
+];
+const G={A:"Action",V:"Adventure",C:"Comedy",D:"Drama",F:"Fantasy",R:"Romance",S:"Sci-Fi",H:"Horror",M:"Mystery",T:"Thriller",P:"Psychological",U:"Supernatural",K:"Dark",O:"Sports",I:"Music",E:"Mecha",L:"Slice of Life",Y:"Historical"};
+`Naruto|2002|220|AV
+Dragon Ball|1986|153|AV
+Dragon Ball Super|2015|131|AV
+Dragon Ball GT|1996|64|AV
+Dragon Ball Daima|2024|20|AVC
+Fairy Tail|2009|328|AVF
+Boruto|2017|293|AV
+Soul Eater|2008|51|AU
+Blue Exorcist|2011|25|AUF
+D.Gray-man|2006|103|AUK
+Yu Yu Hakusho|1992|112|AU
+Rurouni Kenshin|1996|94|AY
+Rurouni Kenshin (2023)|2023|24|AY
+Inuyasha|2000|167|AFR
+Fullmetal Alchemist (2003)|2003|51|AVF
+The Seven Deadly Sins|2014|100|AF
+Magi|2012|50|AVF
+Noragami|2014|25|AUC
+Blood Blockade Battlefront|2015|24|AU
+Psycho-Pass|2012|22|SAT
+Ghost in the Shell: Stand Alone Complex|2002|52|SAT
+Ghost in the Shell|1995|1|SA
+Akira|1988|1|SAK
+Perfect Blue|1997|1|PTH
+Paprika|2006|1|SPM
+Your Name|2016|1|RDU
+Weathering With You|2019|1|RDF
+A Silent Voice|2016|1|DR
+Spirited Away|2001|1|VF
+Princess Mononoke|1997|1|AF
+Howl's Moving Castle|2004|1|FR
+My Neighbor Totoro|1988|1|FL
+Grave of the Fireflies|1988|1|DY
+Castle in the Sky|1986|1|VF
+Nausicaä of the Valley of the Wind|1984|1|VSF
+Kiki's Delivery Service|1989|1|FL
+Ponyo|2008|1|FV
+The Wind Rises|2013|1|DY
+Suzume|2022|1|VFD
+The Boy and the Heron|2023|1|FV
+Jujutsu Kaisen 0|2021|1|AU
+Demon Slayer: Mugen Train|2020|1|AU
+One Piece Film: Red|2022|1|AVI
+Dragon Ball Super: Broly|2018|1|AV
+Belle|2021|1|FI
+Wolf Children|2012|1|FD
+The Girl Who Leapt Through Time|2006|1|SR
+Summer Wars|2009|1|SV
+Sword Art Online|2012|96|AVR
+Log Horizon|2013|50|AVF
+Overlord|2015|52|AFK
+That Time I Got Reincarnated as a Slime|2018|72|AF
+Mushoku Tensei|2021|47|FD
+No Game No Life|2014|12|CF
+KonoSuba|2016|20|CF
+The Rising of the Shield Hero|2019|63|AF
+Classroom of the Elite|2017|38|PD
+Rascal Does Not Dream of Bunny Girl Senpai|2018|13|RU
+My Teen Romantic Comedy SNAFU|2013|39|RC
+Horimiya|2021|13|RC
+My Dress-Up Darling|2022|12|RC
+Lycoris Recoil|2022|13|AT
+Spice and Wolf|2008|25|RFV
+Fruits Basket (2019)|2019|63|RDU
+Ouran High School Host Club|2006|26|CR
+Nana|2006|47|RDI
+Maid Sama!|2010|26|CR
+Lovely Complex|2007|24|CR
+Skip and Loafer|2023|12|CL
+Wotakoi|2018|11|CR
+Komi Can't Communicate|2021|24|CL
+Tonikawa|2020|25|CR
+Nisekoi|2014|32|CR
+The Quintessential Quintuplets|2019|24|CR
+Rent-a-Girlfriend|2020|36|CR
+Domestic Girlfriend|2019|12|DR
+Love, Chunibyo & Other Delusions|2012|12|CR
+Plastic Memories|2015|13|DRS
+Anohana|2011|11|DU
+Angel Beats!|2010|13|DUC
+Charlotte|2015|13|DUC
+Clannad|2007|23|DR
+Kanon|2006|24|DR
+Air|2005|13|DR
+Little Busters!|2012|26|DC
+Hyouka|2012|22|ML
+Tsurune|2018|13|OD
+Free!|2013|12|OD
+Yuri!!! on Ice|2016|12|OR
+Ping Pong the Animation|2014|11|OD
+Slam Dunk|1993|101|OC
+Hajime no Ippo|2000|76|OD
+Megalo Box|2018|13|OA
+Initial D|1998|26|OA
+Captain Tsubasa|1983|128|O
+Ace of Diamond|2013|75|OD
+Major|2004|154|OD
+The Prince of Tennis|2001|178|OC
+Run with the Wind|2018|23|OD
+Chihayafuru|2011|25|OD
+Hikaru no Go|2001|75|DV
+Welcome to the NHK|2006|24|DC
+Barakamon|2014|12|CL
+Aria the Animation|2005|13|L
+Non Non Biyori|2013|12|LC
+Laid-Back Camp|2018|12|LC
+K-On!|2009|27|LCI
+Lucky Star|2007|24|LC
+Azumanga Daioh|2002|26|CL
+Nichijou|2011|26|C
+Daily Lives of High School Boys|2012|12|C
+Grand Blue|2018|12|C
+The Disastrous Life of Saiki K.|2016|120|CU
+Asobi Asobase|2018|12|C
+FLCL|2000|6|SCE
+Space Dandy|2014|26|SC
+Outlaw Star|1998|26|SA
+Planetes|2003|26|SD
+Legend of the Galactic Heroes|1988|110|SD
+Mobile Suit Gundam|1979|43|EA
+Mobile Suit Gundam Wing|1995|49|EA
+Gundam: Iron-Blooded Orphans|2015|50|EAD
+Gundam: The Witch from Mercury|2022|24|EA
+Macross Frontier|2008|25|ESR
+Darling in the Franxx|2018|24|ESR
+The Vision of Escaflowne|1996|26|EFV
+86 Eighty-Six|2021|23|SA
+Knights of Sidonia|2014|24|SEA
+Eureka Seven|2005|50|ESV
+Aldnoah.Zero|2014|24|ESA
+Full Metal Panic!|2002|24|EAC
+Gate|2015|24|AF
+Goblin Slayer|2018|12|AFK
+Berserk (2016)|2016|13|KFA
+Claymore|2007|26|AFK
+Devilman Crybaby|2018|10|KHA
+Ergo Proxy|2006|23|SP
+Serial Experiments Lain|1998|13|SP
+Texhnolyze|2003|22|SK
+Paranoia Agent|2004|13|PM
+Higurashi: When They Cry|2006|26|HM
+Another|2012|12|HM
+Junji Ito Collection|2018|12|H
+Shiki|2010|22|HM
+Mononoke|2007|12|UM
+Hell Girl|2005|26|HU
+Blood-C|2011|12|HA
+Elfen Lied|2004|13|KH
+Bloom Into You|2018|13|RD
+Rozen Maiden|2005|12|FD
+Puella Magi Madoka Magica|2011|12|KF
+Bakemonogatari|2009|15|UM
+Monogatari Second Season|2013|26|UM
+Fate/Zero|2011|25|AF
+Fate/stay night: Unlimited Blade Works|2014|26|AF
+Fate/Apocrypha|2017|25|AF
+Fate/Grand Order: Babylonia|2019|21|AF
+Fate/stay night: Heaven's Feel|2017|3|AF
+A Certain Magical Index|2008|24|AS
+A Certain Scientific Railgun|2009|24|AS
+Seraph of the End|2015|24|AK
+Date A Live|2013|12|AR
+High School DxD|2012|12|AC
+Highschool of the Dead|2010|12|HA
+Kill la Kill|2013|24|AC
+Little Witch Academia|2017|25|FV
+Promare|2019|1|SA
+Panty & Stocking with Garterbelt|2010|13|AC
+Space Brothers|2012|99|SD
+Vivy: Fluorite Eye's Song|2021|13|SD
+Link Click|2021|11|SDM
+Odd Taxi|2021|13|MD
+Great Teacher Onizuka|1999|43|CD
+Cardcaptor Sakura|1998|70|FV
+Sailor Moon|1992|46|FR
+Pokémon|1997|1200|VC
+Digimon Adventure|1999|54|VF
+Yu-Gi-Oh!|2000|224|VF
+Beastars|2019|36|DM
+Dorohedoro|2020|12|KA
+Kaiju No. 8|2024|12|AS
+Sakamoto Days|2025|11|AC
+Mashle: Magic and Muscles|2023|24|AC
+Hell's Paradise|2023|13|AK
+Black Lagoon|2006|29|AT
+Baccano!|2007|16|AM
+Durarara!!|2010|24|UM
+Golden Kamuy|2018|49|AVY
+Drifters|2016|12|AF
+Dororo|2019|24|AK
+Kingdom|2012|116|AY
+Ranking of Kings|2021|23|VF
+Land of the Lustrous|2017|12|FD
+Tower of God|2020|13|AVF
+The God of High School|2020|13|A
+Noblesse|2020|13|AU
+Wonder Egg Priority|2021|13|DP
+SK8 the Infinity|2021|12|OC
+Yowamushi Pedal|2013|38|OD
+Eyeshield 21|2005|145|OC
+Baki|2018|26|A
+Kengan Ashura|2019|24|AO
+Record of Ragnarok|2021|26|AF
+Terror in Resonance|2014|11|T
+Robotics;Notes|2012|22|SD
+The Promised Neverland|2019|23|TK
+Death Parade|2015|12|PM
+Kakegurui|2017|24|PT
+Akagi|2005|26|PT
+Kaiji|2007|52|PT
+Zom 100: Bucket List of the Dead|2023|12|CH
+Cells at Work!|2018|13|CL
+Food Wars!|2015|86|C
+Restaurant to Another World|2017|12|FL
+Delicious in Dungeon|2024|24|AFC
+Trigun Stampede|2023|12|SA
+Pluto|2023|8|SMT
+Lupin the Third Part 5|2018|24|AC
+Detective Conan|1996|1100|MC
+Moriarty the Patriot|2020|24|MY
+Black Butler|2008|24|UM
+Vampire Knight|2008|13|RU
+Blood+|2005|50|HA
+Love Live! School Idol Project|2013|26|IL
+The iDOLM@STER|2011|25|IL
+Oshi no Ko|2023|25|DMU
+Given|2019|11|IR
+Beck: Mongolian Chop Squad|2004|26|IC
+Nodame Cantabile|2007|23|IR
+Carole & Tuesday|2019|24|IS
+Zombieland Saga|2018|24|CI
+Ya Boy Kongming!|2022|12|CI
+Orange|2016|13|RD
+Tsuki ga Kirei|2017|12|RD
+Kimi ni Todoke|2009|25|RD
+Say "I Love You."|2012|13|RD
+Ao Haru Ride|2014|12|RD
+My Love Story!!|2015|24|RC
+Monthly Girls' Nozaki-kun|2014|12|CR
+Great Pretender|2020|23|MC
+Gangsta.|2015|12|AK
+Tokyo Revengers|2021|50|AD
+Jormungand|2012|24|AT
+Black Bullet|2014|13|AS
+Sword of the Stranger|2007|1|AY
+Blade of the Immortal|2019|24|AY
+Hozuki's Coolheadedness|2014|13|CU
+Natsume's Book of Friends|2008|78|UL
+March Comes in Like a Lion|2016|44|DL
+Akudama Drive|2020|12|SA
+ID: Invaded|2020|13|SM
+Platinum End|2021|24|TK
+Gleipnir|2020|13|KA
+Deadman Wonderland|2011|12|KA
+Btooom!|2012|12|AT
+Future Diary|2011|26|TK
+Tokyo Mew Mew|2002|52|FR
+Chobits|2002|26|SR
+Ah! My Goddess|2005|24|FR
+Rosario + Vampire|2008|13|CR
+Kemono Friends|2017|12|CL
+Girls und Panzer|2012|12|AC
+Strike Witches|2008|12|AC
+Arpeggio of Blue Steel|2013|12|AS
+Princess Jellyfish|2010|11|CR
+Paradise Kiss|2005|12|RD
+Honey and Clover|2005|24|RD
+Usagi Drop|2011|11|DL
+Sweetness and Lightning|2016|12|L
+Haibane Renmei|2002|13|DF
+Kino's Journey|2003|13|VP
+Wolf's Rain|2003|26|AF
+Rave Master|2001|51|AVF
+Zatch Bell!|2003|150|AC
+Flame of Recca|1997|42|AU
+Shaman King|2001|64|AU
+Shaman King (2021)|2021|52|AU
+Dragon Quest: The Adventure of Dai|2020|100|AVF
+Digimon Tamers|2001|51|AVF
+Saint Seiya|1986|114|AF
+Fist of the North Star|1984|109|AK
+JoJo's Bizarre Adventure|2012|190|AVU
+Ushio and Tora|2015|39|AU
+Bungo Stray Dogs|2016|61|AU
+Sasaki and Miyano|2022|12|RD
+Banana Fish|2018|24|AKD
+The Apothecary Diaries|2023|48|MDY
+Wind Breaker|2024|13|AD
+Undead Unluck|2023|24|AC
+Blue Box|2024|25|RO
+Ranma ½|1989|161|CR
+Ranma ½ (2024)|2024|12|CR
+Urusei Yatsura|2022|46|CR
+Maison Ikkoku|1986|96|CR
+City Hunter|1987|140|AC
+Bubblegum Crisis|1987|8|SA
+Gunbuster|1988|6|SE
+Patlabor|1989|47|SE
+Gunslinger Girl|2003|13|AK
+Gungrave|2003|26|AK
+Witch Hunter Robin|2002|26|AU
+Ninja Scroll|1993|1|AK
+Vampire Hunter D|1985|1|KH
+Jin-Roh: The Wolf Brigade|1999|1|SD
+Metropolis|2001|1|SD
+Redline|2009|1|SA
+Tekkonkinkreet|2006|1|AD
+Millennium Actress|2001|1|DR
+Tokyo Godfathers|2003|1|DC
+The Tatami Galaxy|2010|11|CP
+Mind Game|2004|1|VC
+Keep Your Hands Off Eizouken!|2020|12|CD
+Ride Your Wave|2019|1|RF
+Children of the Sea|2019|1|FD
+I Want to Eat Your Pancreas|2018|1|DR
+5 Centimeters per Second|2007|1|RD
+The Garden of Words|2013|1|RD
+Children Who Chase Lost Voices|2011|1|VF
+Evangelion: 3.0+1.0|2021|1|SE
+Mirai|2018|1|FD
+Mary and the Witch's Flower|2017|1|FV
+Lu Over the Wall|2017|1|FC
+Maquia: When the Promised Flower Blooms|2018|1|FD
+Spy x Family Code: White|2023|1|AC
+Naruto: Shippuden Movie|2007|1|A
+Haikyuu!! The Dumpster Battle|2024|1|OD
+Cowboy Bebop: The Movie|2001|1|SA
+Fullmetal Alchemist: The Conqueror of Shamballa|2005|1|AF
+Attack on Titan: The Last Attack|2024|1|AK
+Naruto the Movie: The Last|2014|1|AR
+Bleach: Memories of Nobody|2006|1|AU
+Sound! Euphonium|2015|13|DI
+Hibike! Euphonium|2016|13|DI
+Dungeon ni Deai: Is It Wrong to Try to Pick Up Girls in a Dungeon?|2015|60|AFR
+Bofuri|2020|24|CF
+Spider, So What?|2021|24|FC
+Cautious Hero|2019|12|FC
+Disgaea|2006|12|CF
+Slayers|1995|26|CF
+Lodoss War|1990|13|AF
+The Twelve Kingdoms|2002|45|FV
+Fushigi Yûgi|1995|52|FR
+Yona of the Dawn|2014|24|FR
+Snow White with the Red Hair|2015|24|FR
+Code Geass: Lelouch of the Re;surrection|2019|1|SE
+Mobile Fighter G Gundam|1994|49|EA
+Cyborg 009|2001|51|SA
+Astro Boy|1963|193|SV
+Mazinger Z|1972|92|EA
+Tiger Mask|1969|105|O
+Space Battleship Yamato|1974|26|SA
+Mobile Police Patlabor|1988|7|SE
+Gankutsuou: The Count of Monte Cristo|2004|24|SD
+Samurai 7|2004|26|AY
+Trinity Blood|2005|24|AH
+Hakuouki|2010|12|RY`.split("\n").forEach(l=>{const[t,y,e,g]=l.split("|");A.push([t,+y,+e,[...g].map(c=>G[c])])});
+const D=`A rubber-bodied pirate sails the Grand Line to find the ultimate treasure and become Pirate King.
+Grown-up Naruto fights to protect his village from the Akatsuki and a looming ninja war.
+A teenager gains Soul Reaper powers and battles evil spirits called Hollows.
+The Soul Society faces a deadly Quincy invasion in Ichigo's final arc.
+Humanity hides behind walls from man-eating Titans, until the walls fall.
+A student finds a notebook that kills anyone whose name is written in it.
+Two brothers use alchemy to seek the Philosopher's Stone and restore their bodies.
+Young Gon becomes a Hunter to find his father, meeting dangerous rivals along the way.
+A teen swallows a cursed finger and joins sorcerers fighting deadly curses.
+After his family is slain, Tanjiro hunts demons to cure his sister.
+Debt-ridden Denji merges with a chainsaw devil and joins a devil-hunting agency.
+Bounty hunters drift through space in a stylish, jazz-fueled story about their pasts.
+A self-styled mad scientist discovers how to send messages to the past.
+An exiled prince gains mind-control power and wages war against an empire.
+A young Viking warrior seeks revenge while searching for a life free of war.
+A weak-looking esper with huge power tries to live an ordinary life.
+A bored hero who wins every fight with one punch searches for a real challenge.
+In a world of superpowers, a powerless boy inherits the strongest hero's ability.
+Goku and friends defend Earth against ever-stronger alien and android villains.
+In an Edo invaded by aliens, a samurai handles absurd jobs with comedy and heart.
+A short, determined volleyball player aims to lead his high-school team to the top.
+A basketball team's overlooked shadow player helps Seirin take on the Generation of Miracles.
+A traumatized pianist is pulled back to music by a free-spirited violinist.
+A former soldier writes letters for others and learns what her commander meant by love.
+An elf mage looks back on her hero party's journey after their adventure ends.
+A spy, an assassin and a telepath pose as a family for a secret mission.
+In dystopian Night City, a street kid fights for survival through cybernetic upgrades.
+A reluctant teen pilots a giant biomechanical robot against mysterious Angels.
+A surgeon hunts the patient he saved who turned out to be a serial killer.
+Guts, a lone mercenary, fights through a dark medieval world of demons and fate.
+A vampire and his master hunt the undead in a blood-soaked war on monsters.
+A gunslinger with a huge bounty wanders a desert planet, preaching peace.
+Two swordsmen and a girl seek a samurai who smells of sunflowers.
+Two orphans in a magical kingdom race to become the next Wizard King.
+A young firefighter fights flame-based creatures to uncover a conspiracy.
+After the world is petrified, a science genius rebuilds civilization from scratch.
+The weakest hunter gains the power to level up on his own.
+A girl who believes in ghosts and a boy who believes in aliens both turn out right.
+Two top students battle to make the other confess first.
+A tough-looking boy and a tiny, fierce girl help each other with their crushes.
+Life after high school and the start of family life in an emotional sequel.
+After being summoned to another world, Subaru relives his death to save his friends.
+A college student becomes half-ghoul and struggles between the human and ghoul worlds.
+An alien parasite takes over a boy's right hand instead of his brain.
+A struggling man can travel back in time to prevent tragedies, including a childhood murder.
+A girl and a robot boy descend into a deadly abyss full of mystery.
+A young swordsman joins assassins fighting to topple a corrupt empire.
+Strikers compete in a program to forge Japan's most egoistic forward.
+An anxious, socially awkward girl dreams of playing in a band.
+A wandering healer explores strange life forms called Mushi.
+Two outcasts and a ragtag crew fight giant robots to free humanity.
+A young ninja outcast dreams of becoming Hokage and earning his village's respect.
+A boy with a monkey tail searches for dragon balls and trains in martial arts.
+Goku and Vegeta face gods of destruction and tournaments across universes.
+Goku is turned into a child and searches for the Black Star Dragon Balls.
+Goku and friends are shrunk to kids and travel through demon-realm mysteries.
+A wizard guild's mages tackle quests and dark guilds, powered by friendship.
+Naruto's son Boruto steps up in a new ninja era with new dangers.
+Scythe-wielding meisters and weapon partners collect souls to create a death scythe.
+A boy who is Satan's son becomes an exorcist to defy his fate.
+An exorcist wields an Innocence weapon to fight the Millennium Earl's Akuma.
+A delinquent turned spirit detective investigates supernatural cases and tournaments.
+A wandering swordsman vows never to kill, protecting people in the Meiji era.
+The reboot retells Kenshin's wanderings with new animation.
+A modern girl travels to the past, meeting a half-demon and hunting jewel shards.
+Brothers Edward and Alphonse search for a way to restore their bodies.
+A princess searches for legendary knights to save her kingdom.
+A boy and companions explore dungeons and get drawn into magical war.
+A stray god, a human girl, and a spirit work to reclaim shrines.
+A chaotic mix of supernatural creatures protects a New York turned Hellsalem's Lot.
+In a future where crime is predicted, an inspector confronts the system.
+Section 9 hunts cyber-criminals in a cyberpunk world.
+A cyborg agent hunts a hacker who blurs the line between human and machine.
+Neo-Tokyo teens clash over a psychic power that threatens the city.
+A pop idol turned actress is stalked and loses her grip on reality.
+A therapist chases a stolen device that lets people invade dreams.
+Two teens swap bodies across distance and time, linked by a comet.
+A runaway boy meets a girl who can control the weather in Tokyo.
+A former bully tries to atone for tormenting a deaf classmate.
+A girl must work in a spirit bathhouse to free her parents.
+A young prince joins a war between forest gods and humans.
+A young woman cursed to age is whisked away by a wizard in his castle.
+Two sisters meet gentle forest spirits near their new countryside home.
+Two siblings struggle to survive in the final months of World War II.
+A girl and a boy search for a floating island and its secrets.
+A princess tries to prevent war between humans and a toxic forest.
+A young witch moves to a new town and starts a delivery service.
+A fish-girl befriends a boy and wishes to become human.
+A fictionalized story of the airplane designer behind Japan's WWII fighters.
+A teen closes mysterious doors across Japan to stop disasters.
+A boy mourns his mother and enters a strange world with a talking heron.
+Yuta Okkotsu confronts a curse and the sorcerer Geto.
+Tanjiro and the Flame Hashira board a train haunted by a demon.
+Uta, a famed singer, reveals a link to Shanks and the Straw Hats.
+Goku and Vegeta battle a Saiyan survivor of Planet Vegeta's destruction.
+A shy teen becomes a famous singer in a virtual world called U.
+A woman raises two half-wolf children in the countryside.
+A teen discovers she can leap through time and repeats her days.
+A math prodigy gets pulled into a virtual world's hacker attack.
+Players trapped in a VR game must clear it to escape.
+Trapped in an MMORPG, a veteran player and friends build a guild.
+A gamer stuck in his MMORPG as a lich lord conquers the new world.
+A man reincarnated as a slime builds a nation of monsters.
+A jobless NEET reincarnates in a magical world and tries to live well.
+Two shut-in siblings enter a world where everything is decided by games.
+A shut-in reincarnates in a fantasy world with a useless goddess and misfit party.
+A hero summoned and betrayed rises with a slave girl and a shield.
+A cunning loner tries to rise to the top of a school ruled by merit.
+A teen meets a bunny-girl senpai who suffers from puberty syndrome.
+A cynical loner is forced into a club to fix his worldview.
+Two seemingly opposite classmates fall for each other in secret.
+A shy boy who makes dolls helps a cosplay-loving classmate.
+A secret agency of teen girls maintains peace in Japan.
+A traveling merchant and a wolf deity travel and trade.
+An orphan befriends a family cursed by the Chinese zodiac.
+A girl accidentally joins a host club of wealthy boys.
+Two women named Nana meet on a train and become roommates.
+A tough student council president hides her job at a maid cafe.
+A tall girl and a short boy bicker and fall in love.
+A small-town girl heads to an elite high school and meets a witty boy.
+Adult otaku coworkers fall in love and balance geek hobbies.
+A shy girl aims to make 100 friends despite her anxiety.
+A man gets engaged to a girl he just met, at first sight.
+A yakuza heir searches for the girl who holds the key to an old promise.
+A tutor teaches five identical sisters who hate studying.
+A college student rents a girlfriend and his life gets complicated.
+A student's new stepsisters include his own teacher.
+A boy tries to leave his delusional past behind but meets a girl who thinks she's a goddess.
+A girl and an android partner work to retrieve androids called giftia.
+Childhood friends are haunted by the ghost of a friend who died.
+Teens in the afterlife battle to find purpose, fighting a mysterious girl.
+Students with special powers are hunted for their abilities.
+A delinquent and a girl meet at school and discover family.
+A boy visits a snowy town and meets five girls with mysterious pasts.
+A traveling puppeteer meets a mysterious girl.
+A boy and friends form a baseball team and face a secret world.
+A student solves everyday mysteries with his energy-conserving mindset.
+A new archery club member finds himself and a teammate.
+A swimmer reunites with childhood friends and rivals.
+A figure skater whose career falters finds a coach in his idol.
+Two childhood friends who love table tennis rise together.
+A hotheaded delinquent joins his school's basketball club.
+A bullied teen finds new strength in boxing.
+A boxer with a mechanical gear battles for a dream.
+A tofu delivery boy discovers his father's racing past.
+A soccer prodigy dreams of leading Japan to the World Cup.
+A pitcher joins a high school baseball team's rise to Koshien.
+A boy's baseball dream spans from elementary school to the majors.
+A tennis prodigy enters a middle school powerhouse.
+A former runner joins a ragtag team aiming for the Hakone Ekiden.
+A girl discovers competitive karuta and dreams of being queen.
+A boy teams with the ghost of a Go master.
+A reclusive man struggles with isolation and unexpected social threads.
+A calligrapher moves to a remote island and finds new inspiration.
+A woman works as a gondolier on Neo-Venezia.
+Rural kids live peaceful, slow days in the countryside.
+Girls go camping in beautiful settings to relax.
+Four girls form a light music club with a lazy attitude.
+Four girls enjoy daily life and otaku culture.
+High-school girls and their teachers live absurd daily lives.
+Absurd gags and daily life unfold in a mad school-life comedy.
+A comedy about three boys' ordinary days.
+A freshman discovers his university diving club is mostly for drinking.
+A psychic teen wants a quiet life but is surrounded by oddballs.
+Three girls form a pastimes club and play ridiculous games.
+A boy's life is upended by a wild woman and a robot from his head.
+An alien dandy hunts rare aliens in a zany space comedy.
+A treasure hunter and his crew chase fortune in a space western.
+Debris collectors in space chase ambition in a realistic future.
+Two brilliant commanders clash across a galactic war.
+A teen pilot enters a war between space colonies and Earth.
+Five pilots secretly fight a global war to protect space colonies.
+Child soldiers fight a revolution in a war-torn solar system.
+A girl from a remote planet attends a school for mobile suits.
+A pilot, a singer, and a friend fight alien invaders.
+Pilots in a giant robot pair up to fight for humanity.
+A girl is transported to a magical world to fight in a war.
+A war of unmanned drones and the soldiers who must fight them.
+Humanity survives in a space colony against an alien enemy.
+A boy joins a group riding the waves with a mysterious girl.
+Earth and Mars clash while a teen pilot tries to save peace.
+A mercenary soldier protects a girl while posing as a high-school student.
+A JSDF unit enters a fantasy world through a gate.
+A veteran adventurer hunts goblins and protects villagers.
+A reboot of Guts and Griffith in modern 3D animation.
+A half-monster woman hunts yoma in a medieval world.
+A boy merges with a demon and fights humanity's end.
+Robots and humans confront a mystery in a dome city.
+A girl explores a network and the line between reality and virtual.
+Factions fight for power in a bleak, mysterious city.
+Detectives investigate a series of strange attacks and psychological mysteries.
+A village hides a curse, and friendship twists into horror.
+A transfer student faces a deadly curse tied to his classmates.
+Short horror tales adapt the manga master's disturbing stories.
+A village falls to mysterious deaths and vampire-like creatures.
+A medicine seller confronts spirits in ornate, ritualistic art.
+A mysterious girl delivers revenge for those with a grudge.
+A girl fights vampire-like monsters in a gory conspiracy.
+A girl with a deadly power escapes a lab and meets two friends.
+A girl develops feelings for her senior and discovers herself.
+A shut-in becomes a master of living dolls in battle.
+A girl makes a contract to become a magical girl, with a dark price.
+A teen helped by a mysterious girl confronts oddities.
+Araragi meets more strange girls and confronts supernatural problems.
+Mages and servants fight in the fourth Holy Grail War.
+Shirou joins a war with heroic spirits over a wish-granting grail.
+Two factions of servants battle in a Holy Grail War over Romania.
+A time-travel quest chases a Singularity in ancient Mesopotamia.
+Shirou must choose between Sakura and justice as the Grail War ends.
+An esper city follows Touma, a boy with a power-nullifying hand.
+A high-level esper investigates incidents with friends.
+Humanity is nearly wiped out by vampires, and a boy joins the demon-hunting army.
+A boy tries to date and seal spirits who wreak havoc.
+A pervert becomes a devil and joins a school of supernatural beings.
+Students fight to survive a zombie outbreak.
+A girl wears a sentient uniform to fight an academy's elite.
+A girl enrolls in a magic school, chasing a legendary witch.
+A firefighter and an arsonist fight mutants with fire-based powers.
+Angels fight ghosts with lowbrow humor and wild style.
+Two brothers vow to become astronauts and follow their dream.
+An AI singer travels through time to save humanity.
+A photographer and a friend can travel into photos to change time.
+A taxi driver gets caught in a missing-girl case among animal characters.
+A reformed gang member becomes a teacher and helps students.
+A girl collects magical cards to prevent catastrophe.
+A girl transforms into a champion fighting evil in a sailor suit.
+A boy and his Pikachu journey to become a Pokémon Master.
+Kids and their digital monsters are pulled into the Digital World.
+A boy solves a puzzle and duels using cards to save the world.
+A wolf student's life at an animal boarding school explores social tensions.
+A man with a lizard head searches for who turned him that way.
+A cleaner joins the Defense Force to fight kaiju.
+A retired legendary hitman now runs a convenience store.
+A magic-less boy trains his body to survive in a magic academy.
+A ninja and an executioner seek an elixir on a deadly island.
+A salaryman joins pirates and mercenaries in a dirty Thai port city.
+Immortal alchemists, gangsters, and thieves cross paths on a train.
+Ikebukuro's gangs, myths, and mysterious people intersect.
+A veteran soldier and an Ainu girl search for gold.
+Heroes from different eras are summoned to a war across worlds.
+A samurai regains his body parts by slaying demons.
+A boy aims to become a great general in China's Warring States era.
+A deaf, small prince tries to be a great king.
+Gem beings fight lunarians in a distant future.
+A boy follows his friend into a mysterious tower.
+Teen fighters enter a tournament with godlike powers.
+A vampire noble awakens and attends high school.
+A girl enters a dream world to save a friend.
+Skateboarding teens race in an underground race.
+A shy otaku joins a cycling club and finds a new passion.
+A scrawny kid becomes a star American football player.
+A teen trains to be the strongest fighter in a martial arts world.
+A salaryman is forced to fight in an underground arena.
+Gods and humans clash in a tournament of champions.
+Two terrorists commit attacks in Tokyo and race against detectives.
+A girl builds a robot club and chases a grand dream.
+Orphans at a seemingly perfect home uncover a terrible truth.
+The dead are judged through deadly games at a bar.
+A transfer student gambles at a high-stakes school.
+A genius gambler becomes legend in a high-stakes game of mahjong.
+A debt-ridden man is forced into deadly gambles.
+A burned-out office worker lives out his bucket list during a zombie outbreak.
+Anthropomorphized blood cells fight bacteria inside the human body.
+A young chef fights through an elite culinary school.
+A restaurant opens a door to a fantasy world.
+Adventurers cook monsters to survive in a dungeon.
+A reimagined tale of gunslinger Vash the Stampede.
+A detective investigates robot murders in a tale of AI.
+The gentleman thief Lupin faces new heists with friends.
+A teen detective shrunk to a child solves crimes.
+A detective helps the poor while exposing corrupt nobles.
+A boy butler serves a young earl and hunts secrets.
+A girl at a school for vampires keeps a dangerous secret.
+A girl fights vampire-like chiropterans with a mysterious sword.
+Students form an idol group to save their school.
+Idol hopefuls train and chase their dreams.
+A doctor is reborn as the child of an idol and finds the dark truth.
+A band forms around a guitarist and a vocalist with a past.
+A boy joins a band and learns rock.
+A conductor and a pianist find music and each other.
+Two girls make music in a futuristic Mars.
+Girls resurrected as zombies form an idol group.
+A strategist is reborn as a modern-day manager.
+A girl receives letters from her future self to avert a tragedy.
+Two shy middle schoolers fall in love.
+A shy girl is befriended by a popular boy.
+A girl falls in love with a boy who confesses first.
+A girl reunites with her first love in high school.
+A big boy with a kind heart finds romance.
+A girl's love letter is mistaken, leading to comedy.
+A con man targets criminals in elaborate scams.
+Mercenaries and criminals live in the gritty city of Ergastulum.
+A man travels back to rescue a girl from a gang.
+An arms dealer's team travels the world and clashes with militaries.
+A boy and girl fight monsters in a post-apocalyptic world.
+A samurai protects a boy from Chinese warriors.
+An immortal samurai seeks revenge through a bloody journey.
+A demon assistant handles a sophisticated hell.
+A boy can see spirits and helps them.
+A professional shogi player copes with loneliness and growth.
+A dystopian city is transformed by a violent game.
+A detective enters murderers' minds to catch them.
+Humans receive angelic powers and fight in a game for godhood.
+A boy gets turned into a mascot and fights with a girl.
+A boy is imprisoned in a prison where convicts fight with powers.
+A student is forced into survival on an island with bombs.
+A boy gets a diary that predicts the future and joins a deadly game.
+Girls fight aliens with animal DNA powers.
+A student finds a humanoid computer girl.
+A goddess grants a young man a wish and moves into his home.
+A boy attends a school full of monsters and a vampire girl.
+Animal-human friends explore a safari park together.
+Girls compete in tank warfare as a school sport.
+Girls with mechanical devices fight alien Neuroi.
+A submarine crew faces a naval fleet of mysterious ships.
+A fashion-loving girl lives with otaku roommates.
+A student models for a fashion school group.
+Art students struggle with love and futures.
+A bachelor adopts his late grandfather's daughter.
+A teacher and daughter learn to cook together.
+Winged beings live in a walled town.
+A traveler and her talking bike explore strange lands.
+Wolves in human disguise search for paradise.
+A boy and a dog seek hidden power in a world of magic.
+Magic book mates and their human partners compete.
+A boy gets a flame-wielding ninja power and fights.
+A boy talks to ghosts and joins a tournament.
+A remake retells Yoh Asakura's quest for a Shaman King.
+A boy trains to become a hero and defeat evil.
+Tamers and digimon fight across two worlds.
+Knights wield cosmo power in the name of Athena.
+A martial artist wanders a post-apocalypse and defends the weak.
+The Joestar family fights across generations with Stands.
+A boy teams up with a beast to fight demons.
+Detectives with literary names handle supernatural crimes.
+Two boys fall for each other in a gentle story.
+A gangster and a photographer fight in New York.
+A girl solves mysteries in the imperial palace.
+A delinquent joins a school protecting a town.
+A girl cursed with misfortune teams up with an immortal.
+Teens balance sports, studies, and a secret crush.
+A boy turns into a girl when splashed with water.
+The classic martial arts comedy returns with updated art.
+An alien girl is smitten with a lecherous boy.
+A man falls for the manager of his apartment building.
+A private detective protects clients in Shinjuku.
+Armored cops fight mechanical criminals in a future city.
+A girl trains to be a pilot and fight space monsters.
+Police use giant mechs to confront crime.
+Girls turned cyborg assassins work for an agency.
+A man resurrects with new powers and goes after a syndicate.
+A girl hunts witches with her sidekick.
+A samurai and a ninja fight a demon.
+A half-vampire hunter takes a job to find a kidnapped daughter.
+A soldier in a dystopian Japan faces a terrible truth.
+A detective investigates a robot city and a mysterious girl.
+A racer enters a race against galactic competitors.
+Two orphans fight to protect their city from yakuza.
+A filmmaker interviews a famous actress about her life.
+Three homeless people find a baby on Christmas Eve.
+A student relives college years searching for a perfect life.
+A man escapes a prison and jumps through surreal adventures.
+Girls create anime and bring their imagination to life.
+A girl and a firefighter find love through a ghostly water spirit.
+A girl meets two boys raised by dugongs.
+A boy meets a girl who has a secret illness.
+A boy and girl face distance and time.
+A student skips class and meets an older woman.
+A girl explores a hidden underworld.
+The final film resolves the Rebuild of Evangelion series.
+A girl meets her future sister and the family's past.
+A girl finds a magic flower and a witch school.
+A boy meets a merboy and music brings change.
+A girl from a long-lived people raises a human boy.
+The Forgers embark on a mission for Anya's wishes.
+Naruto and Sasuke face a new threat in a feature film.
+Rivals Nekoma and Karasuno meet for a showdown.
+Spike and crew take on a bioterror threat on Mars.
+Edward is stuck in our world while Alphonse awaits in Amestris.
+The final chapter of Attack on Titan.
+Naruto and Hinata face a lunar threat.
+Ichigo meets a mysterious girl and a crisis.
+A girl joins the school band to chase excellence.
+A girl continues her band's journey toward nationals.
+A boy joins a goddess's familia in a dungeon city.
+A girl plays a VR game as a tank and becomes overpowered.
+A girl is reborn as a spider in a labyrinth.
+A hero hides his strength to stay safe.
+A prince overlord tries to prove he's a hero.
+Lina Inverse and companions fight in a magical comedy.
+Adventurers fight in a classic high-fantasy war.
+A girl is transported to a mysterious realm and becomes queen.
+Two girls enter a book world to summon a god.
+A princess in exile searches for dragons.
+A herbalist meets a prince in a fantasy kingdom.
+Lelouch's fate is revealed in a sequel film.
+Nations compete in a global fighting tournament.
+Cyborgs fight a global war.
+A robot boy fights for justice among humans.
+A pilot uses a huge robot to defend Earth.
+A wrestler fights for orphans in the ring.
+A crew travels to Iscandar to save Earth.
+The film follows police robot pilots.
+A noble avenges betrayal in a futuristic Count of Monte Cristo.
+Samurai defend a village against bandits in a sci-fi retelling.
+A priest hunts vampires in a gothic future.
+A swordsman joins the Shinsengumi in the Bakumatsu.`.split("\n");A.forEach((a,i)=>a.push(D[i]||""));
+const S=["watching","watched","watchlist","dropped"];
+const L={watching:"Watching",watched:"Watched",watchlist:"Watchlist",dropped:"Dropped"};
+let st={},tab="all",cur=null;
+try{st=JSON.parse(localStorage.getItem("binge-status")||"{}")}catch(e){st={}}
+const save=()=>{try{localStorage.setItem("binge-status",JSON.stringify(st))}catch(e){}push()};
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const genres=[...new Set(A.flatMap(a=>a[3]))].sort();
+$("genre").innerHTML='<option value="">Any genre</option>'+genres.map(g=>`<option>${g}</option>`).join("");
+
+function chips(t){return `<div class="st" role="group" aria-label="Status for ${esc(t)}">`+S.map(s=>
+ `<button class="chip" data-s="${s}" data-t="${esc(t)}" aria-pressed="${st[t]===s}">${L[s]}</button>`).join("")+`</div>`}
+
+function renderCard(a,rolling){
+ const c=$("card");c.className="card"+(rolling?" roll":"");
+ if(rolling){c.innerHTML=`<div class="title">${esc(a[0])}</div><p class="meta">Rolling…</p>`;return}
+ c.innerHTML=`<span class="sfx" aria-hidden="true">ドン!</span><div class="title">${esc(a[0])}</div>
+ <p class="meta">${a[1]} · ${a[2]} episodes · about ${Math.round(a[2]*24/60)} hours</p>
+ <p class="desc">${esc(a[4]||"")}</p>
+ <div class="tags">${a[3].map(g=>`<span class="tag">${g}</span>`).join("")}</div>${chips(a[0])}`;
+}
+
+function pick(){
+ const g=$("genre").value,p=$("pool").value;
+ let pool=A.filter(a=>(!g||a[3].includes(g))&&(p==="all"||(p==="watchlist"?st[a[0]]==="watchlist":!st[a[0]])));
+ if(!pool.length){$("card").className="card";$("card").innerHTML=`<div class="title">Nothing to pick</div><p class="meta">No matches. Try another genre or pick from Everything.</p>`;return}
+ if(pool.length>1&&cur)pool=pool.filter(a=>a[0]!==cur);
+ const final=pool[Math.floor(Math.random()*pool.length)];
+ const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+ const done=()=>{cur=final[0];renderCard(final);$("card").classList.add("pop")};
+ if(still){done();return}
+ let n=0;const t=setInterval(()=>{renderCard(pool[Math.floor(Math.random()*pool.length)],true);if(++n>14){clearInterval(t);done()}},65);
+}
+
+function renderList(){
+ const q=$("q").value.trim().toLowerCase();
+ const cnt=s=>A.filter(a=>st[a[0]]===s).length;
+ $("tabs").innerHTML=[["all","All",A.length],...S.map(s=>[s,L[s],cnt(s)])].map(([k,l,n])=>
+  `<button class="tab" role="tab" data-tab="${k}" aria-selected="${tab===k}">${l}<b>${n}</b></button>`).join("");
+ const rows=A.filter(a=>(tab==="all"||st[a[0]]===tab)&&(a[0]+" "+a[4]).toLowerCase().includes(q));
+ $("list").innerHTML=rows.length?rows.map(a=>`<div class="row"><div><div class="n">${st[a[0]]?`<span class="dot ${st[a[0]]}"></span>`:""}${esc(a[0])}</div>
+  <div class="m">${a[1]} · ${a[2]} eps · ${a[3].join(", ")}</div><div class="m">${esc(a[4])}</div></div>${chips(a[0])}</div>`).join("")
+  :`<div class="empty">${tab==="all"?"No titles match your search.":"Nothing here yet. Mark an anime as "+L[tab]+" to see it here."}</div>`;
+}
+
+document.addEventListener("click",e=>{
+ const c=e.target.closest(".chip");
+ if(c){const t=c.dataset.t,s=c.dataset.s;st[t]===s?delete st[t]:st[t]=s;save();
+  const a=A.find(x=>x[0]===t);if(cur===t&&!$("card").classList.contains("roll"))renderCard(a);renderList();return}
+ const tb=e.target.closest(".tab");if(tb){tab=tb.dataset.tab;renderList()}
+});
+const LINK="https://claude.ai/artifact/T8SEHAfQijQ7QB3DCdrmb9",ST="BR1-";
+const enc=()=>{let s="";for(const a of A)s+=S.indexOf(st[a[0]])+1;return ST+s.replace(/0+$/,"")};
+const dec=t=>{const m=/BR1-[0-4]*/.exec(t||"");if(!m)return null;const o={};[...m[0].slice(4)].forEach((c,i)=>{if(c!=="0"&&A[i])o[A[i][0]]=S[+c-1]});return o};
+let db=null,uid=null,uname="",sync=true,tm;
+try{sync=localStorage.getItem("binge-sync")!=="off"}catch(e){}
+function push(){if(!db||!uid||!sync)return;clearTimeout(tm);tm=setTimeout(async()=>{try{await db.doc("data/users/"+uid+"/library").set({code:enc(),updated:Date.now()})}catch(e){}},600)}
+function refresh(){renderList();if(cur&&!$("card").classList.contains("roll"))renderCard(A.find(x=>x[0]===cur))}
+function apply(o,replace){if(replace)st={};for(const t in o){if(replace||!st[t])st[t]=o[t]}save();refresh()}
+async function pull(){if(!db||!uid||!sync)return;try{const s=await db.doc("data/users/"+uid+"/library").get();if(s.exists){const o=dec(s.data().code);if(o){const loc=st;st={...o};for(const t in loc)if(!st[t])st[t]=loc[t];save();refresh()}}else push()}catch(e){}}
+function acct(){const e=$("acct");
+ if(!db||!uid){e.innerHTML=`<span>Saving on this device only.</span><a href="https://claude.ai/login" target="_blank" rel="noopener">Sign in to sync</a>`;return}
+ e.innerHTML=sync?`<span>Signed in as ${esc(uname||"you")} · library synced</span><button id="so">Sign out</button>`:`<span>Signed out · saving on this device only</span><button id="si">Sign in</button>`}
+$("acct").onclick=e=>{const b=e.target.closest("button");if(!b)return;sync=b.id==="si";try{localStorage.setItem("binge-sync",sync?"on":"off")}catch(x){}acct();if(sync)pull()};
+acct();
+(async()=>{try{if(window.claude){const u=await claude.use("user");if(u){const me=await u.me();uid=me.id;uname=me.name||""}db=await claude.use("db")}}catch(e){db=null}acct();pull()})();
+const P=$("panel");
+const copy=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){try{$("ta").select();return document.execCommand("copy")}catch(x){return false}}};
+$("shareBtn").onclick=()=>{const n=Object.keys(st).length,msg=`My Binge Roulette library (${n} titles). Open ${LINK}, tap My library > Import a library, and paste this code:\n${enc()}`;
+ P.hidden=false;
+ P.innerHTML=`<p class="m">${n} titles tracked. Send this to a friend:</p><textarea id="ta" readonly rows="4"></textarea><div><button class="pbt" id="cp">Copy</button>${navigator.share?'<button class="pbt" id="sh">Share…</button>':""}</div><p class="m" id="pm"></p>`;
+ $("ta").value=msg;
+ $("cp").onclick=async()=>{$("pm").textContent=(await copy(msg))?"Copied.":"Select the text above and copy it."};
+ if($("sh"))$("sh").onclick=()=>{navigator.share({text:msg}).catch(()=>{})}};
+$("impBtn").onclick=()=>{P.hidden=false;
+ P.innerHTML=`<p class="m">Paste a library code, or the whole message a friend sent.</p><textarea id="ta" rows="3" placeholder="BR1-..."></textarea><div><button class="pbt" id="mg">Merge with mine</button><button class="pbt" id="rp">Replace mine</button></div><p class="m" id="pm"></p>`;
+ let armed=false;
+ const go=r=>{const o=dec($("ta").value);if(!o){$("pm").textContent="No library code found. A code starts with BR1-.";return}apply(o,r);$("pm").textContent=`Imported ${Object.keys(o).length} titles.`};
+ $("mg").onclick=()=>go(false);
+ $("rp").onclick=()=>{if(!armed){armed=true;$("rp").textContent="Tap again to replace";return}go(true)}};
+$("libbtn").onclick=()=>{const s=$("lib"),o=s.hidden;s.hidden=!o;$("libbtn").setAttribute("aria-expanded",o);$("libbtn").textContent=o?"Hide my library":"Open my library";if(o)s.scrollIntoView({behavior:"smooth"})};
+$("go").onclick=pick;$("q").oninput=renderList;renderList();
+</script>
+<footer>★ Ayush Sensei <small>先生</small> ★</footer>
+</body>
+</html>
